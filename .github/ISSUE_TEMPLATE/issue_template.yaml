@@ -1,0 +1,25 @@
+name: Feature Request
+description: Suggest a new feature
+body:
+  - type: markdown
+    attributes:
+      value: "## Feature Description"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Detailed description of the feature
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Data Management
+        - Model Training
+        - Evaluation
+        - Inference
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be completed for this feature to be done?
