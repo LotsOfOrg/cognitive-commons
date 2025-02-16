@@ -1,0 +1,102 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cognitive-commons",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation.",
+    "crumbs": [
+      "cognitive-commons"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "cognitive-commons",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall cognitive_commons in Development mode\n# make sure cognitive_commons package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to cognitive_commons\n$ nbdev_prepare",
+    "crumbs": [
+      "cognitive-commons"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "cognitive-commons",
+    "section": "Usage",
+    "text": "Usage\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/LotsOfOrg/cognitive-commons.git\nor from conda\n$ conda install -c LotsOfOrg cognitive_commons\nor from pypi\n$ pip install cognitive_commons\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "cognitive-commons"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "cognitive-commons",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2",
+    "crumbs": [
+      "cognitive-commons"
+    ]
+  },
+  {
+    "objectID": "evaluation.html",
+    "href": "evaluation.html",
+    "title": "evaluation",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()",
+    "crumbs": [
+      "evaluation"
+    ]
+  },
+  {
+    "objectID": "data.html",
+    "href": "data.html",
+    "title": "Data Management",
+    "section": "",
+    "text": "FineWeb use a multi-stage filtering approach that we could look to inspire a DataQualityChecker class.\nThe key insights we’re implementing from FineWeb are: 1. Multi-stage quality filtering 2. Focus on line-level quality metrics 3. Tracking content reuse and impact 4. Weighted scoring based on historical performance\n\nsource\n\n\n\n DataQualityChecker (min_quality_score:float=0.12)\n\nQuality checking pipeline inspired by FineWeb’s approach\nSimilarly we can implement a citation-like systme similar to how FineWeb tracks data reuse\n\nsource\n\n\n\n\n ContentProvenance ()\n\nTracks content reuse and impact across training runs\n\ndef test_quality_checker():\n    checker = DataQualityChecker(min_quality_score=0.5)\n    \n    # Test high quality content\n    good_content = \"This is a well-formatted paragraph.\\nIt has proper punctuation.\\nAnd good length lines.\"\n    is_good, scores = checker.is_acceptable(good_content)\n    test_eq(is_good, True)\n    test_gt(scores['quality_score'], 0.5)\n    \n    # Test low quality content\n    bad_content = \"short\\nshort\\nshort\\nno punct\\nrepeated\\nrepeated\"\n    is_bad, scores = checker.is_acceptable(bad_content)\n    test_eq(is_bad, False)\n    test_lt(scores['quality_score'], 0.5)\n\ndef test_provenance():\n    prov = ContentProvenance()\n    \n    # Test recording usage\n    prov.record_usage(\"content_1\", \"model_v1\", 0.8)\n    prov.record_usage(\"content_1\", \"model_v2\", 0.9)\n    \n    # Test impact calculation\n    impact = prov.calculate_impact_score(\"content_1\")\n    test_gt(impact, 0.8)  # Should be &gt; 0.8 due to weighted average\n    \n    # Test nonexistent content\n    test_eq(prov.calculate_impact_score(\"nonexistent\"), 0.0)\n\n\nsource\n\n\n\n\n ContentStore (store_path:pathlib.Path, min_quality_score:float=0.12)\n\nManages storage and retrieval of training data content with quality checking and provenance tracking\n\n@patch\ndef cleanup(self:ContentStore):\n    \"Remove all files in the store\"\n    if self.store_path.exists():\n        for f in self.store_path.glob('*'):\n            f.unlink()\n        self.store_path.rmdir()\n\n#| test\ndef test_enhanced_content_store():\n    # Setup\n    store = ContentStore(Path('test_store'), min_quality_score=0.5)\n    \n    # Test adding high-quality content\n    good_content = \"This is a well-formatted paragraph.\\nIt has proper punctuation.\\nAnd good length lines.\"\n    content_id, scores = store.add_content(good_content, \"test_user_1\")\n    \n    # Verify content was accepted and stored\n    test_not_none(content_id)\n    test_gt(scores['quality_score'], 0.5)\n    \n    # Test adding low-quality content\n    bad_content = \"short\\nshort\\nshort\\nno punct\\nrepeated\\nrepeated\"\n    rejected_id, bad_scores = store.add_content(bad_content, \"test_user_2\")\n    \n    # Verify content was rejected\n    test_none(rejected_id)\n    test_lt(bad_scores['quality_score'], 0.5)\n    \n    # Test usage recording and impact scoring\n    store.record_usage(content_id, \"model_v1\", 0.8)\n    store.record_usage(content_id, \"model_v2\", 0.9)\n    \n    # Check metadata includes impact score\n    metadata = store.get_metadata(content_id)\n    test_not_none(metadata.get('impact_score'))\n    test_gt(metadata['impact_score'], 0.8)\n    \n    # Cleanup\n    store.cleanup()\n\n\nstore = ContentStore(Path('example_store'), min_quality_score=0.5)\n\n# Try adding high-quality content\ngood_content = \"\"\"\nThis is a well-formatted document with proper sentences.\nIt contains multiple paragraphs with good structure.\nEach line ends with proper punctuation.\n\"\"\"\n\ncontent_id, scores = store.add_content(good_content, \"alice\")\nprint(f\"Content quality scores: {scores}\")\nprint(f\"Content ID: {content_id[:8]}... (from alice)\")\n\n# Record some usage history\nstore.record_usage(content_id, \"model_v1\", 0.8)\nstore.record_usage(content_id, \"model_v2\", 0.9)\n\n# Check the metadata\nmetadata = store.get_metadata(content_id)\nprint(f\"\\nContent metadata:\")\nprint(json.dumps(metadata, indent=2))\n\n# Try adding low-quality content\nbad_content = \"short\\nno punct\\nrepeated\\nrepeated\"\nrejected_id, bad_scores = store.add_content(bad_content, \"bob\")\nprint(f\"\\nRejected content scores: {bad_scores}\")\n\n# Cleanup\nstore.cleanup()\n\nContent quality scores: {'quality_score': 0.68, 'punctuation_ratio': 0.6, 'unique_lines_ratio': 0.8, 'short_lines_ratio': 0.4}\nContent ID: 59dc718b... (from alice)\n\nContent metadata:\n{\n  \"contributor_id\": \"alice\",\n  \"timestamp\": \"2025-02-16T12:57:55.960288+00:00\",\n  \"size\": 151,\n  \"quality_scores\": {\n    \"quality_score\": 0.68,\n    \"punctuation_ratio\": 0.6,\n    \"unique_lines_ratio\": 0.8,\n    \"short_lines_ratio\": 0.4\n  },\n  \"impact_score\": 1.8323106826194044\n}\n\nRejected content scores: {'quality_score': 0.30000000000000004, 'punctuation_ratio': 0.0, 'unique_lines_ratio': 0.75, 'short_lines_ratio': 1.0}",
+    "crumbs": [
+      "Data Management"
+    ]
+  },
+  {
+    "objectID": "data.html#taking-inspiration-from-fineweb",
+    "href": "data.html#taking-inspiration-from-fineweb",
+    "title": "Data Management",
+    "section": "",
+    "text": "FineWeb use a multi-stage filtering approach that we could look to inspire a DataQualityChecker class.\nThe key insights we’re implementing from FineWeb are: 1. Multi-stage quality filtering 2. Focus on line-level quality metrics 3. Tracking content reuse and impact 4. Weighted scoring based on historical performance\n\nsource\n\n\n\n DataQualityChecker (min_quality_score:float=0.12)\n\nQuality checking pipeline inspired by FineWeb’s approach\nSimilarly we can implement a citation-like systme similar to how FineWeb tracks data reuse\n\nsource\n\n\n\n\n ContentProvenance ()\n\nTracks content reuse and impact across training runs\n\ndef test_quality_checker():\n    checker = DataQualityChecker(min_quality_score=0.5)\n    \n    # Test high quality content\n    good_content = \"This is a well-formatted paragraph.\\nIt has proper punctuation.\\nAnd good length lines.\"\n    is_good, scores = checker.is_acceptable(good_content)\n    test_eq(is_good, True)\n    test_gt(scores['quality_score'], 0.5)\n    \n    # Test low quality content\n    bad_content = \"short\\nshort\\nshort\\nno punct\\nrepeated\\nrepeated\"\n    is_bad, scores = checker.is_acceptable(bad_content)\n    test_eq(is_bad, False)\n    test_lt(scores['quality_score'], 0.5)\n\ndef test_provenance():\n    prov = ContentProvenance()\n    \n    # Test recording usage\n    prov.record_usage(\"content_1\", \"model_v1\", 0.8)\n    prov.record_usage(\"content_1\", \"model_v2\", 0.9)\n    \n    # Test impact calculation\n    impact = prov.calculate_impact_score(\"content_1\")\n    test_gt(impact, 0.8)  # Should be &gt; 0.8 due to weighted average\n    \n    # Test nonexistent content\n    test_eq(prov.calculate_impact_score(\"nonexistent\"), 0.0)\n\n\nsource\n\n\n\n\n ContentStore (store_path:pathlib.Path, min_quality_score:float=0.12)\n\nManages storage and retrieval of training data content with quality checking and provenance tracking\n\n@patch\ndef cleanup(self:ContentStore):\n    \"Remove all files in the store\"\n    if self.store_path.exists():\n        for f in self.store_path.glob('*'):\n            f.unlink()\n        self.store_path.rmdir()\n\n#| test\ndef test_enhanced_content_store():\n    # Setup\n    store = ContentStore(Path('test_store'), min_quality_score=0.5)\n    \n    # Test adding high-quality content\n    good_content = \"This is a well-formatted paragraph.\\nIt has proper punctuation.\\nAnd good length lines.\"\n    content_id, scores = store.add_content(good_content, \"test_user_1\")\n    \n    # Verify content was accepted and stored\n    test_not_none(content_id)\n    test_gt(scores['quality_score'], 0.5)\n    \n    # Test adding low-quality content\n    bad_content = \"short\\nshort\\nshort\\nno punct\\nrepeated\\nrepeated\"\n    rejected_id, bad_scores = store.add_content(bad_content, \"test_user_2\")\n    \n    # Verify content was rejected\n    test_none(rejected_id)\n    test_lt(bad_scores['quality_score'], 0.5)\n    \n    # Test usage recording and impact scoring\n    store.record_usage(content_id, \"model_v1\", 0.8)\n    store.record_usage(content_id, \"model_v2\", 0.9)\n    \n    # Check metadata includes impact score\n    metadata = store.get_metadata(content_id)\n    test_not_none(metadata.get('impact_score'))\n    test_gt(metadata['impact_score'], 0.8)\n    \n    # Cleanup\n    store.cleanup()\n\n\nstore = ContentStore(Path('example_store'), min_quality_score=0.5)\n\n# Try adding high-quality content\ngood_content = \"\"\"\nThis is a well-formatted document with proper sentences.\nIt contains multiple paragraphs with good structure.\nEach line ends with proper punctuation.\n\"\"\"\n\ncontent_id, scores = store.add_content(good_content, \"alice\")\nprint(f\"Content quality scores: {scores}\")\nprint(f\"Content ID: {content_id[:8]}... (from alice)\")\n\n# Record some usage history\nstore.record_usage(content_id, \"model_v1\", 0.8)\nstore.record_usage(content_id, \"model_v2\", 0.9)\n\n# Check the metadata\nmetadata = store.get_metadata(content_id)\nprint(f\"\\nContent metadata:\")\nprint(json.dumps(metadata, indent=2))\n\n# Try adding low-quality content\nbad_content = \"short\\nno punct\\nrepeated\\nrepeated\"\nrejected_id, bad_scores = store.add_content(bad_content, \"bob\")\nprint(f\"\\nRejected content scores: {bad_scores}\")\n\n# Cleanup\nstore.cleanup()\n\nContent quality scores: {'quality_score': 0.68, 'punctuation_ratio': 0.6, 'unique_lines_ratio': 0.8, 'short_lines_ratio': 0.4}\nContent ID: 59dc718b... (from alice)\n\nContent metadata:\n{\n  \"contributor_id\": \"alice\",\n  \"timestamp\": \"2025-02-16T12:57:55.960288+00:00\",\n  \"size\": 151,\n  \"quality_scores\": {\n    \"quality_score\": 0.68,\n    \"punctuation_ratio\": 0.6,\n    \"unique_lines_ratio\": 0.8,\n    \"short_lines_ratio\": 0.4\n  },\n  \"impact_score\": 1.8323106826194044\n}\n\nRejected content scores: {'quality_score': 0.30000000000000004, 'punctuation_ratio': 0.0, 'unique_lines_ratio': 0.75, 'short_lines_ratio': 1.0}",
+    "crumbs": [
+      "Data Management"
+    ]
+  },
+  {
+    "objectID": "integration_tests.html",
+    "href": "integration_tests.html",
+    "title": "integration tests",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()",
+    "crumbs": [
+      "integration tests"
+    ]
+  },
+  {
+    "objectID": "model.html",
+    "href": "model.html",
+    "title": "model",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()",
+    "crumbs": [
+      "model"
+    ]
+  },
+  {
+    "objectID": "inference.html",
+    "href": "inference.html",
+    "title": "inference",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()",
+    "crumbs": [
+      "inference"
+    ]
+  }
+]
