@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "cognitive-commons"
+  site-url: "https://LotsOfOrg.github.io/cognitive-commons"
+  description: "An open ecosystem for collaborative AI development through verifiable data provenance, distributed compute resources, and token-based incentives. Contributors work together to build and deploy better AI models while being fairly rewarded for their participation."
+  repo-branch: main
+  repo-url: "https://github.com/LotsOfOrg/cognitive-commons"
