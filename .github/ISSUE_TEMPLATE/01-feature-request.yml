@@ -1,25 +1,63 @@
-name: Feature Request
-description: Suggest a new feature
+name: "💡 Feature Request"
+description: Create a new ticket for a new feature request
+title: "💡 [REQUEST] - <title>"
+labels: [
+  "enhancement"
+]
 body:
-  - type: markdown
+  - type: input
+    id: startDate
     attributes:
-      value: "## Feature Description"
+      label: "Start Date"
+      description: Start of development
+      placeholder: "month/day/year"
+    validations:
+      required: false
   - type: textarea
-    id: description
+    id: implementationPR
     attributes:
-      label: Description
-      description: Detailed description of the feature
-  - type: dropdown
-    id: component
-    attributes:
-      label: Component
-      options:
-        - Data Management
-        - Model Training
-        - Evaluation
-        - Inference
+      label: "Implementation PR"
+      description: Pull request used
+      placeholder: "#Pull Request ID"
+    validations:
+      required: false
   - type: textarea
-    id: acceptance-criteria
+    id: referenceIssues
     attributes:
-      label: Acceptance Criteria
-      description: What needs to be completed for this feature to be done?
+      label: "Reference Issues"
+      description: Common issues
+      placeholder: "#Issues IDs"
+    validations:
+      required: false
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Summary"
+      description: Provide a brief explanation of the feature
+      placeholder: Describe in a few lines your feature request
+    validations:
+      required: true
+  - type: textarea
+    id: basicExample
+    attributes:
+      label: "Basic Example"
+      description: Indicate here some basic examples of your feature.
+      placeholder: A few specific words about your feature request.
+    validations:
+      required: true
+  - type: textarea
+    id: drawbacks
+    attributes:
+      label: "Drawbacks"
+      description: What are the drawbacks/impacts of your feature request ?
+      placeholder: Identify the drawbacks and impacts while being neutral on your feature request
+    validations:
+      required: true
+  - type: textarea
+    id: unresolvedQuestion
+    attributes:
+      label: "Unresolved questions"
+      description: What questions still remain unresolved ?
+      placeholder: Identify any unresolved issues.
+    validations:
+      required: false
